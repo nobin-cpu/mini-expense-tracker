@@ -1,0 +1,58 @@
+// =============================================================================
+// Mini Expense Tracker — Firestore security rules
+//
+// Paste these into the Firebase console:
+//   Firestore Database -> Rules -> replace everything -> Publish
+// (or run `firebase deploy --only firestore:rules` if you use the CLI).
+//
+// Firestore has no tables to create: a document appears the first time the app
+// writes it. These rules are the whole "schema" that matters, because they
+// decide who may read and write what.
+//
+// The shape the app uses:
+//   users/{userId}                       -> the profile: name, email, createdAt
+//   users/{userId}/expenses/{expenseId}  -> one expense
+//
+// Every expense sits underneath the user who owns it, so "you may only touch
+// your own folder" is all the security we need.
+// =============================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Your own profile document.
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // Your own expenses.
+      match /expenses/{expenseId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidExpense();
+      }
+    }
+
+    // Anything not matched above is denied. That is Firestore's default, and
+    // there is no reason for this app to open up anything else.
+
+    // Signed in, and this is your own folder.
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // The same rules the form checks, enforced on the server as well: money must
+    // be a positive number, the category and date must be present, and the note
+    // stays short.
+    function isValidExpense() {
+      let data = request.resource.data;
+      return data.amount is number
+        && data.amount > 0
+        && data.category is string
+        && data.category.size() > 0
+        && data.date is timestamp
+        && (!('note' in data) || data.note == null
+            || (data.note is string && data.note.size() <= 140));
+    }
+  }
+}

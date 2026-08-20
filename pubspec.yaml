@@ -1,0 +1,35 @@
+name: mini_expense_tracker
+description: "Mini Expense Tracker — track personal expenses. Flutter + GetX + Firebase."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  get: ^4.7.3
+  intl: ^0.20.3
+  fl_chart: ^1.2.0
+  shared_preferences: ^2.5.5
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  cloud_firestore: ^6.8.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+
+flutter:
+
+  uses-material-design: true
+
+
+
+
